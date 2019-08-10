@@ -46,13 +46,13 @@ class IndexView(View):
 class PreachView(View):
     """宣讲会抢票页面"""
     def get(self, request):
-        return render(request, 'visit.html')
+        return render(request, 'visit.html', {'result': ''})
 
 
 class VisitView(View):
     """参观取票页面"""
     def get(self, request):
-        return render(request, 'visit.html')
+        return render(request, 'visit.html', {'result': ''})
 
 
 class GetPreachTicketView(View):
