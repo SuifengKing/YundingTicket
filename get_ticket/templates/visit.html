@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>参观预约</title>
+</head>
+<body>
+    <h1 align="center">参观预约</h1><br><hr>
+    <div align="center">
+{#        <form>#}
+            姓名：<input type="text" name="name" id="name" value="张三"><br><br>
+            学号：<input type="text" name="stu_id" id="stu_id" value="2018000000"><br><br>
+            专业：<input type="text" name="major" id="major" value="计算机科学与技术"><br><br>
+            <button onclick="MovieSearch()">提交</button>
+{#            <input type="submit">#}
+{#        </form>#}
+
+        <h1>{{ result }}</h1>
+        <img src="http://qr.topscan.com/api.php?text=http://www.changyaojie.xyz{% url 'ticket_checked' %}?ticket_id={{ result }}">
+
+    </div>
+
+
+<script>
+    function MovieSearch() {
+        let name=document.getElementById('name').value;
+        let stu_id=document.getElementById('stu_id').value;
+        let major=document.getElementById('major').value;
+        if (name=='' ||stu_id=='' ||major==''){
+            alert('不能为空!!!')
+        }
+        else {
+            {#window.open('/ticket/get_preach_ticket/?name='+name+'stu_id='+stu_id+'major='+major);#}
+            window.location.href='/ticket/get_preach_ticket/?name='+name+'&stu_id='+stu_id+'&major='+major
+        }
+    }
+</script>
+
+</body>
+</html>
