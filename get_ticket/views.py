@@ -65,9 +65,7 @@ class GetPreachTicketView(View):
     """抢票后台逻辑"""
     def get(self, request):
         times = request.GET.get('times', '')
-        # r = redis.StrictRedis()
         times_dict = {'1': '12:30', '2': '19:30'}
-        date = time.strftime("%m{}%d{}", time.gmtime()).format('月', '日')
         preach_time = times_dict.get(times, '')
         ticket_id = r.lpop('G-'+times+'-ticket_id')
         if ticket_id is not None:
@@ -75,19 +73,15 @@ class GetPreachTicketView(View):
             name = request.GET.get('name', '')
             stu_id = request.GET.get('stu_id', '')
             major = request.GET.get('major', '')
-            userdata = {'name': name, 'stu_id': stu_id, 'major': major, 'time': date+preach_time}
-            # task = threading.Thread(target=save_data_to_database, args=(ticket_id, userdata, 'preach'))
-            # task.start()
+            userdata = {'name': name, 'stu_id': stu_id, 'major': major, 'time': preach_time}
             save_data_to_database(ticket_id, userdata, 'preach')
             # 抢票成功应该返回学生的相应信息以及票的信息(包括二维码)以便用于检票
-            return render(request, 'preach.html', {'result': ticket_id, 'name': name, 'stu_id': stu_id, 'code': 1, 'times': date+preach_time})
+            return render(request, 'preach.html', {'result': ticket_id, 'name': name, 'stu_id': stu_id, 'code': 1, 'times': preach_time})
         else:
             name = request.GET.get('name', '')
             stu_id = request.GET.get('stu_id', '')
             major = request.GET.get('major', '')
-            userdata = {'name': name, 'stu_id': stu_id, 'major': major, 'time': date+preach_time}
-            # task = threading.Thread(target=save_data_to_database, args=(ticket_id, userdata, 'preach'))
-            # task.start()
+            userdata = {'name': name, 'stu_id': stu_id, 'major': major, 'time': preach_time}
             save_data_to_database(ticket_id, userdata, 'preach')
             return render(request, 'preach.html', {'result': '很遗憾，这个时间段票抢完了!!', 'name': name, 'code': 0})
 
@@ -96,22 +90,13 @@ class GetVisitTicketView(View):
     """预约参观后台逻辑"""
     def get(self, request):
         times = request.GET.get('times', '')
-        # r = redis.StrictRedis()
-        # times_dict = {'1': '12:30', '2': '19:30'}
-        # date = time.strftime("%m{}%d{}", time.gmtime()).format('月', '日')
-        # preach_time = times_dict.get(times, '')
-        all_tickets = r.keys('V-'+times+'*')
-        if len(all_tickets) > 0:
-            ticket = all_tickets[0]
-            ticket_id = r.get(ticket).decode('utf8')
-            r.delete(ticket)
+        ticket_id = r.lpop('V-'+times+'-ticket_id')
+        if ticket_id is not None:
+            ticket_id = ticket_id.decode('utf8')
             name = request.GET.get('name', '')
             stu_id = request.GET.get('stu_id', '')
             major = request.GET.get('major', '')
-            # times = request.GET.get('time', '')
             userdata = {'name': name, 'stu_id': stu_id, 'major': major, 'time': times}
-            # task = threading.Thread(target=save_data_to_database, args=(ticket_id, userdata, 'visit'))
-            # task.start()
             save_data_to_database(ticket_id, userdata, 'visit')
             # 抢票成功应该返回学生的相应信息以及票的信息(包括二维码)以便用于检票
             return render(request, 'visit.html', {'result': ticket_id, 'name': name, 'stu_id': stu_id, 'code': 1, 'times': times})
@@ -120,10 +105,7 @@ class GetVisitTicketView(View):
             name = request.GET.get('name', '')
             stu_id = request.GET.get('stu_id', '')
             major = request.GET.get('major', '')
-            # times = request.GET.get('time', '')
             userdata = {'name': name, 'stu_id': stu_id, 'major': major, 'time': times}
-            # task = threading.Thread(target=save_data_to_database, args=(ticket_id, userdata, 'visit'))
-            # task.start()
             save_data_to_database(ticket_id, userdata, 'visit')
             return render(request, 'visit.html', {'result': '很遗憾，这个时间段票抢完了!!', 'name': name, 'code': 0})
 
@@ -133,26 +115,38 @@ class TicketCheckedView(View):
     def get(self, request):
         if request.user.is_authenticated:       # 判断用户是否登录
             if request.user.is_superuser:       # 判断是否有超级管理员权限
-                ticket_id = request.GET.get('ticket_id', '0-00000')
+                ticket_id = request.GET.get('ticket_id', '0-0-00000')
                 if ticket_id[0] == 'G':
                     user_filter = Grab.objects.filter(ticket_id=ticket_id)
                     if user_filter:
                         user_profile = user_filter.first()
                         if not user_profile.is_checked:
                             name = user_profile.name
-                            major = user_profile.major
+                            stu_id = user_profile.stu_id
                             user_profile.is_checked = True
                             user_profile.save()
-                            return HttpResponse('<h1>检票成功!!<br>欢迎您,'+name+'<br>'+major+'<br>'+ticket_id+'</h1>')
+                            return render(request, 'checked.html', {'result': ticket_id, 'name': name, 'stu_id': stu_id, 'code': 1})
                         else:
-                            return HttpResponse('<h1>此票已作废!!!</h1>')
+                            return render(request, 'checked.html', {'result': '该票已检!!!', 'code': 0})
                     else:
-                        return HttpResponse('<h1>未查到该票信息!!!</h1>')
+                        return render(request, 'checked.html', {'result': '未查到该票信息!!!', 'code': 0})
                 elif ticket_id[0] == 'V':
-                    pass
+                    user_filter = VisitTicket.objects.filter(ticket_id=ticket_id)
+                    if user_filter:
+                        user_profile = user_filter.first()
+                        if not user_profile.is_checked:
+                            name = user_profile.name
+                            stu_id = user_profile.stu_id
+                            user_profile.is_checked = True
+                            user_profile.save()
+                            return render(request, 'checked.html', {'name': name, 'stu_id': stu_id, 'code': 1})
+                        else:
+                            return render(request, 'checked.html', {'result': '该票已检!!!', 'code': 0})
+                    else:
+                        return render(request, 'checked.html', {'result': '未查到该票信息!!!', 'code': 0})
             else:
-                return HttpResponse('<h1>抱歉，您没有权限检票!!!</h1>')
+                return render(request, 'checked.html', {'result': '抱歉，您没有权限检票!!!', 'code': 0})
         else:
-            return HttpResponse('<h1>抱歉，您没有权限检票!!!</h1>')
+            return render(request, 'checked.html', {'result': '抱歉，您没有权限检票!!!', 'code': 0})
 
 
