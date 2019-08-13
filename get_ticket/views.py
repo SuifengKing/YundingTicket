@@ -69,17 +69,12 @@ class GetPreachTicketView(View):
         times_dict = {'1': '12:30', '2': '19:30'}
         date = time.strftime("%m{}%d{}", time.gmtime()).format('月', '日')
         preach_time = times_dict.get(times, '')
-        all_tickets = r.keys('G-'+times+'*')
-        if len(all_tickets) > 0:
-            # ticket = all_tickets[0]
-            # ticket_id = r.get(ticket).decode('utf8')
-            # r.delete(ticket)
-            ticket_id = all_tickets[0].decode('utf8')
-            r.delete(ticket_id)
+        ticket_id = r.lpop('G-'+times+'-ticket_id')
+        if ticket_id is not None:
+            ticket_id = ticket_id.decode('utf8')
             name = request.GET.get('name', '')
             stu_id = request.GET.get('stu_id', '')
             major = request.GET.get('major', '')
-            # times = request.GET.get('time', '')
             userdata = {'name': name, 'stu_id': stu_id, 'major': major, 'time': date+preach_time}
             # task = threading.Thread(target=save_data_to_database, args=(ticket_id, userdata, 'preach'))
             # task.start()
@@ -87,11 +82,9 @@ class GetPreachTicketView(View):
             # 抢票成功应该返回学生的相应信息以及票的信息(包括二维码)以便用于检票
             return render(request, 'preach.html', {'result': ticket_id, 'name': name, 'stu_id': stu_id, 'code': 1, 'times': date+preach_time})
         else:
-            ticket_id = None
             name = request.GET.get('name', '')
             stu_id = request.GET.get('stu_id', '')
             major = request.GET.get('major', '')
-            # times = request.GET.get('time', '')
             userdata = {'name': name, 'stu_id': stu_id, 'major': major, 'time': date+preach_time}
             # task = threading.Thread(target=save_data_to_database, args=(ticket_id, userdata, 'preach'))
             # task.start()

@@ -16,7 +16,7 @@ def add_preach_ticket(num=[('1', 20), ('2', 20)]):
                 active_code += random.choice(all_char)
             # r.set('G-'+times[0]+'-ticket'+str(key), 'G-'+times[0]+'-'+active_code)
             # r.set('G-'+times[0]+'-'+active_code, '1')
-            r.lpush('ticket_id', 'G-'+times[0]+'-'+active_code)
+            r.lpush('G-'+times[0]+'-ticket_id', 'G-'+times[0]+'-'+active_code)
 
     r.save()
     end_time = time.time()
