@@ -8,6 +8,9 @@ import redis
 import time
 
 
+r = redis.StrictRedis()
+
+
 def save_data_to_database(ticket_id, userdata, ticket_type):
     """把数据存入到MySQL数据库"""
     if ticket_type == 'visit':
@@ -46,20 +49,65 @@ class IndexView(View):
 class PreachView(View):
     """宣讲会抢票页面"""
     def get(self, request):
-        return render(request, 'visit.html', {'result': ''})
+        date = time.strftime("%Y-%m-%d  ", time.gmtime())
+        times_dict = {'1': date+'12:30', '2': date+'19:30'}
+        return render(request, 'preach.html', {'result': '', 'times_dict': times_dict})
 
 
 class VisitView(View):
     """参观取票页面"""
     def get(self, request):
-        return render(request, 'visit.html', {'result': ''})
+        times_dict = {'8': '8:30-10:00', '10': '10:00-12:00', '12': '12:30-14:00'}
+        return render(request, 'visit.html', {'result': '', 'times_dict': times_dict})
 
 
 class GetPreachTicketView(View):
     """抢票后台逻辑"""
     def get(self, request):
-        r = redis.StrictRedis()
-        all_tickets = r.keys()
+        times = request.GET.get('times', '')
+        # r = redis.StrictRedis()
+        times_dict = {'1': '12:30', '2': '19:30'}
+        date = time.strftime("%m{}%d{}", time.gmtime()).format('月', '日')
+        preach_time = times_dict.get(times, '')
+        all_tickets = r.keys('G-'+times+'*')
+        if len(all_tickets) > 0:
+            # ticket = all_tickets[0]
+            # ticket_id = r.get(ticket).decode('utf8')
+            # r.delete(ticket)
+            ticket_id = all_tickets[0].decode('utf8')
+            r.delete(ticket_id)
+            name = request.GET.get('name', '')
+            stu_id = request.GET.get('stu_id', '')
+            major = request.GET.get('major', '')
+            # times = request.GET.get('time', '')
+            userdata = {'name': name, 'stu_id': stu_id, 'major': major, 'time': date+preach_time}
+            # task = threading.Thread(target=save_data_to_database, args=(ticket_id, userdata, 'preach'))
+            # task.start()
+            save_data_to_database(ticket_id, userdata, 'preach')
+            # 抢票成功应该返回学生的相应信息以及票的信息(包括二维码)以便用于检票
+            return render(request, 'preach.html', {'result': ticket_id, 'name': name, 'stu_id': stu_id, 'code': 1, 'times': date+preach_time})
+        else:
+            ticket_id = None
+            name = request.GET.get('name', '')
+            stu_id = request.GET.get('stu_id', '')
+            major = request.GET.get('major', '')
+            # times = request.GET.get('time', '')
+            userdata = {'name': name, 'stu_id': stu_id, 'major': major, 'time': date+preach_time}
+            # task = threading.Thread(target=save_data_to_database, args=(ticket_id, userdata, 'preach'))
+            # task.start()
+            save_data_to_database(ticket_id, userdata, 'preach')
+            return render(request, 'preach.html', {'result': '很遗憾，这个时间段票抢完了!!', 'name': name, 'code': 0})
+
+
+class GetVisitTicketView(View):
+    """预约参观后台逻辑"""
+    def get(self, request):
+        times = request.GET.get('times', '')
+        # r = redis.StrictRedis()
+        # times_dict = {'1': '12:30', '2': '19:30'}
+        # date = time.strftime("%m{}%d{}", time.gmtime()).format('月', '日')
+        # preach_time = times_dict.get(times, '')
+        all_tickets = r.keys('V-'+times+'*')
         if len(all_tickets) > 0:
             ticket = all_tickets[0]
             ticket_id = r.get(ticket).decode('utf8')
@@ -67,27 +115,24 @@ class GetPreachTicketView(View):
             name = request.GET.get('name', '')
             stu_id = request.GET.get('stu_id', '')
             major = request.GET.get('major', '')
-            times = request.GET.get('time', '')
+            # times = request.GET.get('time', '')
             userdata = {'name': name, 'stu_id': stu_id, 'major': major, 'time': times}
-            task = threading.Thread(target=save_data_to_database, args=(ticket_id, userdata, 'preach'))
-            task.start()
+            # task = threading.Thread(target=save_data_to_database, args=(ticket_id, userdata, 'visit'))
+            # task.start()
+            save_data_to_database(ticket_id, userdata, 'visit')
             # 抢票成功应该返回学生的相应信息以及票的信息(包括二维码)以便用于检票
-            return render(request, 'visit.html', {'result': ticket_id})
+            return render(request, 'visit.html', {'result': ticket_id, 'name': name, 'stu_id': stu_id, 'code': 1, 'times': times})
         else:
             ticket_id = None
             name = request.GET.get('name', '')
             stu_id = request.GET.get('stu_id', '')
             major = request.GET.get('major', '')
-            times = request.GET.get('time', '')
+            # times = request.GET.get('time', '')
             userdata = {'name': name, 'stu_id': stu_id, 'major': major, 'time': times}
-            task = threading.Thread(target=save_data_to_database, args=(ticket_id, userdata, 'preach'))
-            task.start()
-            return render(request, 'visit.html', {'result': '很遗憾，票抢完了!!'})
-
-
-class GetVisitTicketView(View):
-    def get(self, request):
-        pass
+            # task = threading.Thread(target=save_data_to_database, args=(ticket_id, userdata, 'visit'))
+            # task.start()
+            save_data_to_database(ticket_id, userdata, 'visit')
+            return render(request, 'visit.html', {'result': '很遗憾，这个时间段票抢完了!!', 'name': name, 'code': 0})
 
 
 class TicketCheckedView(View):
