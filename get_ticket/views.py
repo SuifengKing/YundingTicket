@@ -8,35 +8,32 @@ import redis
 import time
 
 
-r = redis.StrictRedis()
+r = redis.StrictRedis(decode_responses=True)
 
 
 def save_data_to_database(ticket_id, userdata, ticket_type):
-    """把数据存入到MySQL数据库"""
+    """把数据存入到Redis数据库"""
+    stu_id = userdata.get('stu_id', '')
     if ticket_type == 'visit':
-        visit_ticket = VisitTicket()
-        visit_ticket.stu_id = userdata.get('stu_id', '')
-        visit_ticket.name = userdata.get('name', '')
-        visit_ticket.major = userdata.get('major', '')
-        visit_ticket.times = userdata.get('time', '')
-        visit_ticket.ticket_id = ticket_id
-        if ticket_id is None:
-            visit_ticket.is_success = False
+        if r.hsetnx('V-U-'+stu_id, 'stu_id', stu_id):
+            if ticket_id is not None:
+                userdata['ticket_id'] = ticket_id
+                userdata['is_success'] = 1
+            else:
+                pass
+            r.hmset('V-U-'+stu_id, userdata)
         else:
-            visit_ticket.is_success = True
-        visit_ticket.save()
-    else:
-        preach_ticket = Grab()
-        preach_ticket.stu_id = userdata.get('stu_id', '')
-        preach_ticket.name = userdata.get('name', '')
-        preach_ticket.major = userdata.get('major', '')
-        preach_ticket.times = userdata.get('time', '')
-        preach_ticket.ticket_id = ticket_id
-        if ticket_id is None:
-            preach_ticket.is_success = False
+            pass
+    elif ticket_type == 'preach':
+        if r.hsetnx('G-U-'+stu_id, 'stu_id', stu_id):
+            if ticket_id is not None:
+                userdata['ticket_id'] = ticket_id
+                userdata['is_success'] = 1
+            else:
+                pass
+            r.hmset('G-U-'+stu_id, userdata)
         else:
-            preach_ticket.is_success = True
-        preach_ticket.save()
+            pass
     print('---存入成功---')
 
 
@@ -67,9 +64,8 @@ class GetPreachTicketView(View):
         times = request.GET.get('times', '')
         times_dict = {'1': '12:30', '2': '19:30'}
         preach_time = times_dict.get(times, '')
-        ticket_id = r.lpop('G-'+times+'-ticket_id')
+        ticket_id = r.lpop('G-'+times+'-tickets')
         if ticket_id is not None:
-            ticket_id = ticket_id.decode('utf8')
             name = request.GET.get('name', '')
             stu_id = request.GET.get('stu_id', '')
             major = request.GET.get('major', '')
@@ -90,9 +86,8 @@ class GetVisitTicketView(View):
     """预约参观后台逻辑"""
     def get(self, request):
         times = request.GET.get('times', '')
-        ticket_id = r.lpop('V-'+times+'-ticket_id')
+        ticket_id = r.lpop('V-'+times+'-tickets')
         if ticket_id is not None:
-            ticket_id = ticket_id.decode('utf8')
             name = request.GET.get('name', '')
             stu_id = request.GET.get('stu_id', '')
             major = request.GET.get('major', '')

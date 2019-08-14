@@ -16,7 +16,7 @@ def add_preach_ticket(num=[('1', 20), ('2', 20)]):
                 active_code += random.choice(all_char)
             # r.set('G-'+times[0]+'-ticket'+str(key), 'G-'+times[0]+'-'+active_code)
             # r.set('G-'+times[0]+'-'+active_code, '1')
-            r.lpush('G-'+times[0]+'-ticket_id', 'G-'+times[0]+'-'+active_code)
+            r.lpush('G-'+times[0]+'-tickets', 'G-'+times[0]+'-'+active_code)
 
     r.save()
     end_time = time.time()
@@ -33,8 +33,7 @@ def add_visit_ticket(num=[]):
             for i in range(5):
                 active_code += random.choice(all_char)
             # r.set('V-'+times[0]+'-ticket'+str(key), 'V-'+times[0]+'-'+active_code)
-            r.lpush('V-'+times[0]+'-ticket_id', 'V-'+times[0]+'-'+active_code)
-
+            r.lpush('V-'+times[0]+'-tickets', 'V-'+times[0]+'-'+active_code)
 
     r.save()
     end_time = time.time()
@@ -67,7 +66,7 @@ def pop_all():
     print('Redis列表弹出:', end_time-start_time)
 
 
-add_preach_ticket(num=[('1', 200), ('2', 200)])
+add_preach_ticket(num=[('1', 100), ('2', 100)])
 # add_visit_ticket(num=[('8', 5),])
 #                       ('10', 5),
 #                       ('12', 5),

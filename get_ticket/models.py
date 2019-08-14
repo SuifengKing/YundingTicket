@@ -10,7 +10,7 @@ class Grab(models.Model):
     times = models.CharField(verbose_name='预约时间', max_length=30)
     is_success = models.BooleanField(verbose_name='是否抢票成功', default=False)
     is_checked = models.BooleanField(verbose_name='是否已检票', default=False)
-    ticket_id = models.CharField(verbose_name='票号', max_length=15, null=True)
+    ticket_id = models.CharField(verbose_name='票号', max_length=15, null=True, default=None)
 
     def __str__(self):
         return '宣讲会抢票数据'
@@ -27,7 +27,7 @@ class VisitTicket(models.Model):
     times = models.CharField(verbose_name='预约时间', max_length=30)
     is_success = models.BooleanField(verbose_name='是否抢票成功', default=False)
     is_checked = models.BooleanField(verbose_name='是否已检票', default=False)
-    ticket_id = models.CharField(verbose_name='票号', max_length=15, null=True)
+    ticket_id = models.CharField(verbose_name='票号', max_length=15, null=True, default=None)
 
     def __str__(self):
         return '参观学生数据'
