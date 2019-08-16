@@ -16,6 +16,7 @@
 <body>
     <h1 align="center">参观预约</h1><br><hr>
     <div align="center">
+        {% if result == '' %}
         姓名：<input type="text" name="name" id="name" value="张三" required><br><br>
         学号：<input type="text" name="stu_id" id="stu_id" value="2018000000" required><br><br>
         专业：<input type="text" name="major" id="major" value="计算机科学与技术"><br><br>
@@ -29,6 +30,7 @@
         </select>
         <br><br>
         <button onclick="MovieSearch()">提交</button>
+        {% endif %}
 
         {% if result != '' %}
             {% if code == 1 %}

@@ -1,0 +1,22 @@
+{% extends 'xadmin/base_site.html' %}
+{% load i18n xadmin_tags %}
+
+{% block content %}
+
+    {% block content-nav %}
+    {% endblock %}
+    <h2 align="center">Redis重置余票</h2><hr>
+    <div align="center">
+        <form action="" id="" method="post">
+            宣讲会12:30：<input type="text" name="preach1" id="1" value="200" required><br><br>
+            宣讲会19:00：<input type="text" name="preach2" id="2" value="200" required><br><br>
+            {% for time_code,time in visit_times_dict.items %}
+                预约参观{{ time }}:<input type="text" name="visit{{ time_code }}" id="{{ time_code }}" value="50" required><br><br>
+            {% endfor %}
+            <input type="submit" value="提交">
+            {% csrf_token %}
+        </form>
+    </div>
+
+
+{% endblock %}

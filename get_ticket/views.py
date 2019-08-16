@@ -1,4 +1,4 @@
-from django.shortcuts import render,HttpResponse
+from django.shortcuts import render
 from django.http import JsonResponse
 from django.views import View
 # Create your views here.
@@ -8,32 +8,22 @@ import redis
 import time
 
 
-r = redis.StrictRedis(decode_responses=True)
-
-
-def save_data_to_database(ticket_id, userdata, ticket_type):
+def save_data_to_database(redis_conn, ticket_id, userdata, ticket_type):
     """把数据存入到Redis数据库"""
     stu_id = userdata.get('stu_id', '')
     if ticket_type == 'visit':
-        if r.hsetnx('V-U-'+stu_id, 'stu_id', stu_id):
-            if ticket_id is not None:
-                userdata['ticket_id'] = ticket_id
-                userdata['is_success'] = 1
-            else:
-                pass
-            r.hmset('V-U-'+stu_id, userdata)
-        else:
-            pass
+        # if r.hsetnx('V-U-'+stu_id, 'stu_id', stu_id):
+        if ticket_id is not None:
+            userdata['ticket_id'] = ticket_id
+            userdata['is_success'] = 1
+        redis_conn.hmset('V-U-'+stu_id, userdata)
+
     elif ticket_type == 'preach':
-        if r.hsetnx('G-U-'+stu_id, 'stu_id', stu_id):
-            if ticket_id is not None:
-                userdata['ticket_id'] = ticket_id
-                userdata['is_success'] = 1
-            else:
-                pass
-            r.hmset('G-U-'+stu_id, userdata)
-        else:
-            pass
+        # if r.hsetnx('G-U-'+stu_id, 'stu_id', stu_id):
+        if ticket_id is not None:
+            userdata['ticket_id'] = ticket_id
+            userdata['is_success'] = 1
+        redis_conn.hmset('G-U-'+stu_id, userdata)
     print('---存入成功---')
 
 
@@ -61,6 +51,7 @@ class VisitView(View):
 class GetPreachTicketView(View):
     """抢票后台逻辑"""
     def get(self, request):
+        r = redis.StrictRedis(decode_responses=True)
         times = request.GET.get('times', '')
         times_dict = {'1': '12:30', '2': '19:30'}
         preach_time = times_dict.get(times, '')
@@ -69,30 +60,31 @@ class GetPreachTicketView(View):
             name = request.GET.get('name', '')
             stu_id = request.GET.get('stu_id', '')
             major = request.GET.get('major', '')
-            userdata = {'name': name, 'stu_id': stu_id, 'major': major, 'time': preach_time}
-            save_data_to_database(ticket_id, userdata, 'preach')
+            userdata = {'name': name, 'stu_id': stu_id, 'major': major, 'times': preach_time}
+            save_data_to_database(r, ticket_id, userdata, 'preach')
             # 抢票成功应该返回学生的相应信息以及票的信息(包括二维码)以便用于检票
             return render(request, 'preach.html', {'result': ticket_id, 'name': name, 'stu_id': stu_id, 'code': 1, 'times': preach_time})
         else:
             name = request.GET.get('name', '')
             stu_id = request.GET.get('stu_id', '')
             major = request.GET.get('major', '')
-            userdata = {'name': name, 'stu_id': stu_id, 'major': major, 'time': preach_time}
-            save_data_to_database(ticket_id, userdata, 'preach')
+            userdata = {'name': name, 'stu_id': stu_id, 'major': major, 'times': preach_time}
+            save_data_to_database(r, ticket_id, userdata, 'preach')
             return render(request, 'preach.html', {'result': '很遗憾，这个时间段票抢完了!!', 'name': name, 'code': 0})
 
 
 class GetVisitTicketView(View):
     """预约参观后台逻辑"""
     def get(self, request):
+        r = redis.StrictRedis(decode_responses=True)
         times = request.GET.get('times', '')
         ticket_id = r.lpop('V-'+times+'-tickets')
         if ticket_id is not None:
             name = request.GET.get('name', '')
             stu_id = request.GET.get('stu_id', '')
             major = request.GET.get('major', '')
-            userdata = {'name': name, 'stu_id': stu_id, 'major': major, 'time': times}
-            save_data_to_database(ticket_id, userdata, 'visit')
+            userdata = {'name': name, 'stu_id': stu_id, 'major': major, 'times': times}
+            save_data_to_database(r, ticket_id, userdata, 'visit')
             # 抢票成功应该返回学生的相应信息以及票的信息(包括二维码)以便用于检票
             return render(request, 'visit.html', {'result': ticket_id, 'name': name, 'stu_id': stu_id, 'code': 1, 'times': times})
         else:
@@ -100,8 +92,8 @@ class GetVisitTicketView(View):
             name = request.GET.get('name', '')
             stu_id = request.GET.get('stu_id', '')
             major = request.GET.get('major', '')
-            userdata = {'name': name, 'stu_id': stu_id, 'major': major, 'time': times}
-            save_data_to_database(ticket_id, userdata, 'visit')
+            userdata = {'name': name, 'stu_id': stu_id, 'major': major, 'times': times}
+            save_data_to_database(r, ticket_id, userdata, 'visit')
             return render(request, 'visit.html', {'result': '很遗憾，这个时间段票抢完了!!', 'name': name, 'code': 0})
 
 

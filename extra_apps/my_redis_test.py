@@ -1,7 +1,6 @@
 import redis
 import random
 import time
-import MySQLdb
 
 r = redis.StrictRedis()
 

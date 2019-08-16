@@ -1,0 +1,17 @@
+{% extends 'xadmin/base_site.html' %}
+{% load i18n xadmin_tags %}
+
+{% block content %}
+
+    {% block content-nav %}
+    {% endblock %}
+    <h2 align="center">Redis转存MySQL</h2><hr>
+    <div align="center">
+    <form method="post" action="">
+        {% csrf_token %}
+        <input type="submit" value="Redis转存MySQL">
+    </form>
+    </div>
+
+
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends 'xadmin/base_site.html' %}
+{% load i18n xadmin_tags %}
+
+{% block content %}
+
+    {% block content-nav %}
+    {% endblock %}
+    <h2 align="center">Redis余票及抢票情况管理</h2><hr>
+    <div align="center">
+        <h3>宣讲会已参与抢票人数:{{ preach_users_num }}</h3>
+        <h3>参观云顶已参与抢票人数:{{ visit_users_num }}</h3>
+        <h3>宣讲会余票情况:</h3>
+        <table border="1">
+            <tr>
+                <th>宣讲时间</th>
+                <th>余票情况</th>
+            </tr>
+            {% for time,num in preach_available_tickets.items %}
+                <tr>
+                    <td>{{ time }}</td>
+                    <td><h4>{{ num }}</h4></td>
+                </tr>
+            {% endfor %}
+        </table>
+        <h3>参观云顶余票情况:</h3>
+        <table border="1">
+            <tr>
+                <th>参观时间段</th>
+                <th>余票情况</th>
+            </tr>
+            {% for time,num in visit_available_tickets.items %}
+                <tr>
+                    <td>{{ time }}</td>
+                    <td><h4>{{ num }}</h4></td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+
+{% endblock %}
