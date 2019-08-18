@@ -16,34 +16,22 @@
 <body>
     <h1 align="center">宣讲会预约</h1><br><hr>
     <div align="center">
-        {% if result == '' %}
+        <form action="{% url 'get_preach_ticket' %}" method="post">
+                姓名：<input type="text" name="name" id="name" value="张三" required><br><br>
+                学号：<input type="text" name="stu_id" id="stu_id" value="2018000000" required><br><br>
+                专业：<input type="text" name="major" id="major" value="计算机科学与技术"><br><br>
+                时间：
+                <select id="times" name="times">
+                    {% for id,time in times_dict.items %}
+                        <option value="{{ id }}">{{ time }}</option>
+                    {% endfor %}
+                </select>
+                <br><br>
+            <input type="submit" value="提交">
+            {% csrf_token %}
+            </form>
+{#        <button onclick="MovieSearch()">提交</button>#}
 
-        姓名：<input type="text" name="name" id="name" value="张三" required><br><br>
-        学号：<input type="text" name="stu_id" id="stu_id" value="2018000000" required><br><br>
-        专业：<input type="text" name="major" id="major" value="计算机科学与技术"><br><br>
-        时间：
-        <select id="times">
-        {% for id,time in times_dict.items %}
-{#            <option value="1">12:30-14:00</option>#}
-{#            <option value="2">18:30-20:00</option>#}
-            <option value="{{ id }}">{{ time }}</option>
-        {% endfor %}
-        </select>
-        <br><br>
-        <button onclick="MovieSearch()">提交</button>
-        {% endif %}
-
-
-        {% if result != '' %}
-            {% if code == 1 %}
-                <h1>{{ name }}同学</h1>
-                <h1>票号:{{ result }}</h1>
-                <img src="http://qr.topscan.com/api.php?text=http://www.changyaojie.xyz{% url 'ticket_checked' %}?ticket_id={{ result }}">
-                <h1>请持此票于{{ times }}来参加宣讲会</h1>
-            {% elif code == 0 %}
-                <h1>{{ result }}</h1>
-            {% endif %}
-        {% endif %}
     </div>
 
 

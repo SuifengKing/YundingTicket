@@ -18,10 +18,15 @@ from django.urls import path, include
 # from ticket.extra_apps import xadmin
 import xadmin
 
-from get_ticket.views import IndexView
+from get_ticket.views import IndexView, page_not_found, page_error
 urlpatterns = [
     # path('admin/', admin.site.urls),
     path('xadmin/', xadmin.site.urls),
     path('', IndexView.as_view(), name='index'),
     path('ticket/', include('get_ticket.urls'))
 ]
+
+# 全局404配置
+handler404 = page_not_found
+handler500 = page_error
+

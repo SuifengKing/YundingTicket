@@ -1,0 +1,38 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test</title>
+</head>
+<body>
+
+<div class="grab_success" style="background:white; width: 375px; height: 667px;margin:0 auto;">
+    <img src="{% static  'logo.png'%}" style="margin-top: 47px;margin-left: 289px;height: 30px;width:46px;" alt="logo"/>
+    <img src="{% static '宣讲会.png' %}" style="width: 294px; height: 223px;margin-left: 41px;margin-top: 35px;" alt="图片"/>
+    <div style="width: 134px;height: 32px;margin-left: 121px;margin-top: 94px;font-size: 32px;
+color: black;">
+        抢票成功
+    </div>
+    <div style="color: #ACA9A9; width: 222px;height: 38px;margin-top: 30px;margin-left: 77px;">
+        <p style="text-align: center;font-size:14px;">恭喜{{ name }}同学抢票成功，</p>
+        <p style="text-align: center;font-size:14px;">请导出门票，准时参加宣讲会哦！</p>
+    </div>
+    <form action="{% url 'export_ticket' %}" method="post">
+        <input type="hidden" name="type" value="{{ type }}">
+        <input type="hidden" name="stu_id" value="{{ stu_id }}">
+{#        <input type="submit" value="导出门票">#}
+        {% csrf_token %}
+        <a href="">
+            <button style="background: #297AFF; border:none;width: 375px;height: 64px;
+            margin-top: 70px;">
+                <p style="font-size: 18px; text-align: center; color: white">导出门票</p>
+            </button>
+        </a>
+    </form>
+
+
+</div>
+
+</body>
+</html>

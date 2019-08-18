@@ -3,7 +3,6 @@ from django.http import JsonResponse
 from django.views import View
 # Create your views here.
 from get_ticket.models import VisitTicket, Grab
-import threading
 import redis
 import time
 
@@ -11,20 +10,13 @@ import time
 def save_data_to_database(redis_conn, ticket_id, userdata, ticket_type):
     """把数据存入到Redis数据库"""
     stu_id = userdata.get('stu_id', '')
+    if ticket_id is not None:
+        userdata['ticket_id'] = ticket_id
+        userdata['is_success'] = 1
     if ticket_type == 'visit':
-        # if r.hsetnx('V-U-'+stu_id, 'stu_id', stu_id):
-        if ticket_id is not None:
-            userdata['ticket_id'] = ticket_id
-            userdata['is_success'] = 1
         redis_conn.hmset('V-U-'+stu_id, userdata)
-
     elif ticket_type == 'preach':
-        # if r.hsetnx('G-U-'+stu_id, 'stu_id', stu_id):
-        if ticket_id is not None:
-            userdata['ticket_id'] = ticket_id
-            userdata['is_success'] = 1
         redis_conn.hmset('G-U-'+stu_id, userdata)
-    print('---存入成功---')
 
 
 class IndexView(View):
@@ -44,57 +36,83 @@ class PreachView(View):
 class VisitView(View):
     """参观取票页面"""
     def get(self, request):
-        times_dict = {'8': '8:30-10:00', '10': '10:00-12:00', '12': '12:30-14:00'}
+        times_dict = {
+            '8': '8:30-10:00',
+            '10': '10:00-12:00',
+            '12': '12:30-14:00',
+            '14': '14:00-16:00',
+            '16': '16:00-18:00',
+            '18': '18:00-19:00',
+            '19': '19:00-20:00',
+            '20': '20:00-21:00',
+            '21': '21:00-22:00'
+        }
         return render(request, 'visit.html', {'result': '', 'times_dict': times_dict})
 
 
 class GetPreachTicketView(View):
     """抢票后台逻辑"""
-    def get(self, request):
+    def post(self, request):
         r = redis.StrictRedis(decode_responses=True)
-        times = request.GET.get('times', '')
-        times_dict = {'1': '12:30', '2': '19:30'}
-        preach_time = times_dict.get(times, '')
+        times = request.POST.get('times', '')
         ticket_id = r.lpop('G-'+times+'-tickets')
+        name = request.POST.get('name', '')
+        stu_id = request.POST.get('stu_id', '')
+        major = request.POST.get('major', '')
+        userdata = {'name': name, 'stu_id': stu_id, 'major': major, 'times': times}
+        save_data_to_database(r, ticket_id, userdata, 'preach')
         if ticket_id is not None:
-            name = request.GET.get('name', '')
-            stu_id = request.GET.get('stu_id', '')
-            major = request.GET.get('major', '')
-            userdata = {'name': name, 'stu_id': stu_id, 'major': major, 'times': preach_time}
-            save_data_to_database(r, ticket_id, userdata, 'preach')
             # 抢票成功应该返回学生的相应信息以及票的信息(包括二维码)以便用于检票
-            return render(request, 'preach.html', {'result': ticket_id, 'name': name, 'stu_id': stu_id, 'code': 1, 'times': preach_time})
+            return render(request, 'successful.html', {'name': name, 'stu_id': stu_id, 'type': 'G'})
         else:
-            name = request.GET.get('name', '')
-            stu_id = request.GET.get('stu_id', '')
-            major = request.GET.get('major', '')
-            userdata = {'name': name, 'stu_id': stu_id, 'major': major, 'times': preach_time}
-            save_data_to_database(r, ticket_id, userdata, 'preach')
-            return render(request, 'preach.html', {'result': '很遗憾，这个时间段票抢完了!!', 'name': name, 'code': 0})
+            return render(request, 'fail.html')
 
 
 class GetVisitTicketView(View):
     """预约参观后台逻辑"""
-    def get(self, request):
+    def post(self, request):
         r = redis.StrictRedis(decode_responses=True)
-        times = request.GET.get('times', '')
+        times = request.POST.get('times', '')
         ticket_id = r.lpop('V-'+times+'-tickets')
+        name = request.POST.get('name', '')
+        stu_id = request.POST.get('stu_id', '')
+        major = request.POST.get('major', '')
+        userdata = {'name': name, 'stu_id': stu_id, 'major': major, 'times': times}
+        save_data_to_database(r, ticket_id, userdata, 'visit')
         if ticket_id is not None:
-            name = request.GET.get('name', '')
-            stu_id = request.GET.get('stu_id', '')
-            major = request.GET.get('major', '')
-            userdata = {'name': name, 'stu_id': stu_id, 'major': major, 'times': times}
-            save_data_to_database(r, ticket_id, userdata, 'visit')
             # 抢票成功应该返回学生的相应信息以及票的信息(包括二维码)以便用于检票
-            return render(request, 'visit.html', {'result': ticket_id, 'name': name, 'stu_id': stu_id, 'code': 1, 'times': times})
+            return render(request, 'successful.html', {'name': name, 'stu_id': stu_id, 'type': 'V'})
         else:
-            ticket_id = None
-            name = request.GET.get('name', '')
-            stu_id = request.GET.get('stu_id', '')
-            major = request.GET.get('major', '')
-            userdata = {'name': name, 'stu_id': stu_id, 'major': major, 'times': times}
-            save_data_to_database(r, ticket_id, userdata, 'visit')
-            return render(request, 'visit.html', {'result': '很遗憾，这个时间段票抢完了!!', 'name': name, 'code': 0})
+            return render(request, 'fail.html')
+
+
+class ExportTicketView(View):
+    def post(self, request):
+        stu_id = request.POST.get('stu_id', '')
+        ticket_type = request.POST.get('type', '')
+        r = redis.StrictRedis(decode_responses=True)
+        is_success = r.hget(ticket_type+'-U-'+stu_id, 'is_success')
+        if is_success:
+            stu_info = r.hgetall(ticket_type + '-U-' + stu_id)
+            return render(request, 'export_ticket.html', stu_info)
+        else:
+            # 查询MySQL
+            if ticket_type == 'G':
+                user_filter = Grab.objects.filter(stu_id=stu_id, is_success=True)
+                if user_filter:
+                    user_profile = user_filter.first()
+                else:
+                    return render(request, 'fail.html')
+            elif ticket_type == 'V':
+                user_filter = VisitTicket.objects.filter(stu_id=stu_id, is_success=True)
+                if user_filter:
+                    user_profile = user_filter.first()
+                else:
+                    return render(request, 'fail.html')
+            name = user_profile.name
+            ticket_id = user_profile.ticket_id
+            times = user_profile.times
+            return render(request, 'export_ticket.html', {'name': name, 'ticket_id':  ticket_id, 'times': times})
 
 
 class TicketCheckedView(View):
@@ -136,4 +154,19 @@ class TicketCheckedView(View):
         else:
             return render(request, 'checked.html', {'result': '抱歉，您没有权限检票!!!', 'code': 0})
 
+
+def page_not_found(request, exception):
+    """404状态的处理"""
+    from django.shortcuts import render_to_response
+    response = render_to_response('404.html')
+    response.status_code = 404
+    return response
+
+
+def page_error(request):
+    """500状态的处理"""
+    from django.shortcuts import render_to_response
+    response = render_to_response('500.html')
+    response.status_code = 500
+    return response
 

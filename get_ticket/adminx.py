@@ -61,7 +61,7 @@ class GrabAdmin(object):
 
 
 class VisitTicketAdmin(object):
-    list_display = ['name', 'stu_id', 'major', 'is_success', 'times', 'ticket_id']
+    list_display = ['name', 'stu_id', 'major', 'is_success', 'is_checked', 'times', 'ticket_id']
     search_fields = ['name', 'stu_id', 'major', 'is_success', 'times']
     list_filter = ['name', 'stu_id', 'major', 'is_success', 'times']
 
