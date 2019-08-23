@@ -1,0 +1,70 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="{% static 'css/ticketSnatching.css' %}">
+
+
+</head>
+<body>
+    <div class="contain">
+        <div class="wrapper">
+            <img src="{% static 'images/logo.png' %}" alt="" style="width: 668px;height:426px;position: absolute;right:2px ;top: 30px">
+
+            <div class="content">
+                <span>2019/<br>宣讲会抢票</span>
+            </div>
+        </div>
+        <div class="banner">
+            <form action="{% url 'get_preach_ticket' %}" id="get_ticket" method="post">
+                    <div class="part1">
+                        <input type="text" name="name" id="name" class="name"  placeholder="请输入名字" required><br>
+<!--                        <img src="images/icon1.png" alt="" class="pic1">-->
+                    </div>
+                <div class="part2">
+                    <input type="number" name="stu_id" id="stu_id" class="name" placeholder="请输入学号" required><br>
+                    <img src="{% static 'images/icon2.png' %}" alt="" class="pic">
+                </div>
+                <div class="part3">
+                    <input type="text" name="major" id="major" class="name" placeholder="请输入专业" required><br>
+                    <img src="{% static 'images/icon3.png' %}" alt="" class="pic">
+                </div>
+                <div style="display: flex" class="part4">
+                    <select id="times" name="times" class="name" >
+                        {% for id,time in times_dict.items %}
+                            <option value="{{ id }}">{{ time }}</option>
+                        {% endfor %}
+                    </select>
+                    <img src="{% static 'images/icon4.png' %}" alt="" class="pic">
+                </div>
+                <div class="blank"></div>
+            {% csrf_token %}
+
+            </form>
+
+
+
+        </div>
+        <button class="btn" onclick="GetTicket()">开始抢票</button>
+
+    </div>
+
+
+    <script>
+    function GetTicket() {
+        let name=document.getElementById('name').value;
+        let stu_id=document.getElementById('stu_id').value;
+        let major=document.getElementById('major').value;
+        if (name=='' ||stu_id=='' ||major==''){
+            alert('不能为空!!!');
+        }
+        else {
+            document.getElementById("get_ticket").submit();
+        }
+    }
+    </script>
+
+</body>
+</html>
