@@ -1,0 +1,34 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+    <title>预约成功</title>
+    <link rel="stylesheet" href="{% static 'css/success.css' %}">
+</head>
+<body>
+    <img src="{% static 'images/logo2.svg' %}" alt="" class="logo">
+    <img src="{% static 'images/visit.svg' %}" alt="" class="success">
+    <p class="text1" >预约成功</p>
+    <div class="text2">
+        <div style="margin-left: 9rem">
+        </div>
+        <p class="text3">请导出门票，准时来参观</p>
+    </div>
+
+
+{#    <button class="button">导出门票</button>#}
+
+        <form action="{% url 'export_ticket' %}" method="post">
+            <input type="hidden" name="type" value="V">
+            <input type="hidden" name="stu_id" value="{{ stu_id }}">
+            {% csrf_token %}
+            <a href="">
+                <button class="button">导出门票</button>
+            </a>
+        </form>
+
+</body>
+</html>

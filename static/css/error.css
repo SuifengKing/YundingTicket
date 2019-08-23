@@ -1,0 +1,36 @@
+.pic{
+    display: block;
+    margin: 0 auto;
+    text-align: center;
+    padding-top: 350px;
+
+}
+.txt1{
+    font-size: 60px;
+    text-align: center;
+    padding-top: 200px;
+    color: #2F2E41;
+}
+.txt2{
+    text-align: center;
+    color: #666666;
+    font-size: 40px;
+    letter-spacing: 8px;
+    margin-bottom: 200px;
+    margin-top: 18px;
+}
+.btn{
+    color: #297AFF;
+    font-size: 48px;
+    width: 570px;
+    height: 130px;
+    letter-spacing: 12px;
+    border-color: #297AFF;
+    margin: 0 auto;
+    display: block;
+    background-color: transparent;
+    border-radius: 30px;
+}
+button{
+
+}

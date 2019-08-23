@@ -1,0 +1,53 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>门票信息</title>
+    <link rel="stylesheet" href="{% static 'css/ticket.css' %}">
+</head>
+<body>
+    <div >
+        <div class="wrapper" >
+            <div class="text">
+                <div class="name1">2019/</div>
+                <br>
+                <div class="name2">遇见云顶</div>
+                <br>
+                <div class="name3">云顶宣讲会</div>
+            </div>
+        </div>
+        <div style="   box-shadow: 2px 2px #fbfbfb; background-color: #ffffff;  width: 840px;margin: 0 auto; border-bottom-left-radius: 20px;border-bottom-right-radius: 20px">
+         <div class="big">
+             <div class="box1">
+                 <p style="margin-right: 100px">XX月XX日</p>
+                 <p>2019</p>
+             </div>
+             <div class="line"></div>
+             <div style="width: 60px;height: 60px;border-radius: 60px;background-color: #297AFF; margin-top: -30px;position: relative;right: 30px"></div>
+             <div style="width: 60px;height: 60px;border-radius: 60px;background-color: #297AFF; margin-top: -60px; position: relative; left: 812px"></div>
+             <div class="box2">
+                 <p style="position: relative;right: 86px">地点</p>
+                 <p style="position: relative;right: 60px">时间</p>
+             </div>
+             <div class="box3">
+                 <p>大数据学院9楼</p>
+                 <p>{{ times }}</p>
+             </div>
+         </div>
+            <div class="" style="display: flex">
+                <img src="http://qr.topscan.com/api.php?text=http://www.changyaojie.xyz{% url 'ticket_checked' %}?ticket_id={{ ticket_id }}" alt="" style="width: 450px;height: 450px;margin-top: 20px;margin-left: 40px">
+                <div class="banner">
+                    <span class="txt1">姓名</span><br>
+                    <span class="txt2">{{ name }}</span><br>
+                    <span class="txt1">宣讲人</span><br>
+                    <span class="txt2" >xxx</span><br>
+                    <span class="txt1">票号</span><br>
+                    <span class="txt2">{{ ticket_id }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <img src="{% static 'images/logo3.svg' %}" alt="" class="logo" style="object-fit: contain">
+</body>
+</html>

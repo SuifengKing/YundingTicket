@@ -6,6 +6,32 @@ from get_ticket.models import VisitTicket, Grab
 import redis
 import time
 
+all_times_dict = {
+    '1': '12:30 PM',
+    '2': '19:00 PM',
+    '8': '8:30-10:00',
+    '10': '10:00-12:00',
+    '12': '12:30-14:00',
+    '14': '14:00-16:00',
+    '16': '16:00-18:00',
+    '18': '18:00-19:00',
+    '19': '19:00-20:00',
+    '20': '20:00-21:00',
+    '21': '21:00-22:00'
+}
+
+visit_times_dict = {
+    '8': '8:30-10:00',
+    '10': '10:00-12:00',
+    '12': '12:30-14:00',
+    '14': '14:00-16:00',
+    '16': '16:00-18:00',
+    '18': '18:00-19:00',
+    '19': '19:00-20:00',
+    '20': '20:00-21:00',
+    '21': '21:00-22:00'
+}
+
 
 def save_data_to_database(redis_conn, ticket_id, userdata, ticket_type):
     """把数据存入到Redis数据库"""
@@ -13,6 +39,7 @@ def save_data_to_database(redis_conn, ticket_id, userdata, ticket_type):
     if ticket_id is not None:
         userdata['ticket_id'] = ticket_id
         userdata['is_success'] = 1
+    userdata['times'] = all_times_dict.get(userdata.get('times', '0'))
     if ticket_type == 'visit':
         redis_conn.hmset('V-U-'+stu_id, userdata)
     elif ticket_type == 'preach':
@@ -36,18 +63,7 @@ class PreachView(View):
 class VisitView(View):
     """参观取票页面"""
     def get(self, request):
-        times_dict = {
-            '8': '8:30-10:00',
-            '10': '10:00-12:00',
-            '12': '12:30-14:00',
-            '14': '14:00-16:00',
-            '16': '16:00-18:00',
-            '18': '18:00-19:00',
-            '19': '19:00-20:00',
-            '20': '20:00-21:00',
-            '21': '21:00-22:00'
-        }
-        return render(request, 'visit.html', {'result': '', 'times_dict': times_dict})
+        return render(request, 'visit.html', {'result': '', 'times_dict': visit_times_dict})
 
 
 class GetPreachTicketView(View):
@@ -63,7 +79,7 @@ class GetPreachTicketView(View):
         save_data_to_database(r, ticket_id, userdata, 'preach')
         if ticket_id is not None:
             # 抢票成功应该返回学生的相应信息以及票的信息(包括二维码)以便用于检票
-            return render(request, 'successful.html', {'name': name, 'stu_id': stu_id, 'type': 'G'})
+            return render(request, 'successful_preach.html', {'name': name, 'stu_id': stu_id})
         else:
             return render(request, 'fail.html')
 
@@ -81,7 +97,7 @@ class GetVisitTicketView(View):
         save_data_to_database(r, ticket_id, userdata, 'visit')
         if ticket_id is not None:
             # 抢票成功应该返回学生的相应信息以及票的信息(包括二维码)以便用于检票
-            return render(request, 'successful.html', {'name': name, 'stu_id': stu_id, 'type': 'V'})
+            return render(request, 'successful_visit.html', {'name': name, 'stu_id': stu_id})
         else:
             return render(request, 'fail.html')
 
@@ -94,25 +110,32 @@ class ExportTicketView(View):
         is_success = r.hget(ticket_type+'-U-'+stu_id, 'is_success')
         if is_success:
             stu_info = r.hgetall(ticket_type + '-U-' + stu_id)
-            return render(request, 'export_ticket.html', stu_info)
+            if ticket_type == 'G':
+                return render(request, 'ticket_preach.html', stu_info)
+            elif ticket_type == 'V':
+                return render(request, 'ticket_visit.html', stu_info)
         else:
             # 查询MySQL
             if ticket_type == 'G':
                 user_filter = Grab.objects.filter(stu_id=stu_id, is_success=True)
                 if user_filter:
                     user_profile = user_filter.first()
+                    name = user_profile.name
+                    ticket_id = user_profile.ticket_id
+                    times = user_profile.times
+                    return render(request, 'ticket_preach.html', {'name': name, 'ticket_id': ticket_id, 'times': times})
                 else:
                     return render(request, 'fail.html')
             elif ticket_type == 'V':
                 user_filter = VisitTicket.objects.filter(stu_id=stu_id, is_success=True)
                 if user_filter:
                     user_profile = user_filter.first()
+                    name = user_profile.name
+                    ticket_id = user_profile.ticket_id
+                    times = user_profile.times
+                    return render(request, 'ticket_visit.html', {'name': name, 'ticket_id': ticket_id, 'times': times})
                 else:
                     return render(request, 'fail.html')
-            name = user_profile.name
-            ticket_id = user_profile.ticket_id
-            times = user_profile.times
-            return render(request, 'export_ticket.html', {'name': name, 'ticket_id':  ticket_id, 'times': times})
 
 
 class TicketCheckedView(View):

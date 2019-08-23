@@ -1,27 +1,38 @@
-<!DOCTYPE html>
+{% load staticfiles %}
+<!doctype html>
 <html lang="en">
 <head>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="description" content="">
-  <meta name="keywords" content="">
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <meta name="renderer" content="webkit">
-  <meta http-equiv="Cache-Control" content="no-siteapp"/>
-
     <meta charset="UTF-8">
-    <title>云顶书院</title>
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>首页</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/index.css' %}" />
 </head>
 <body>
-    <h1 align="center">云顶书院</h1>
-    <div align="center">
-        <a href="{% url 'preach' %}" class="button">
-            <button type="button" style="width: 200px; height: 100px">宣讲会抢票</button>
-        </a>
-        <a href="{% url 'visit' %}" class="button">
-            <button type="button" style="width: 200px; height: 100px">预约参观</button>
-        </a>
+
+    <div class="container">
+
+        <img src="{% static 'images/index_logo.png' %}" class="logo" />
+        <div class="title">
+            <p class="textOne">2019/</p>
+            <p class="textTwo">遇见云顶</p>
+        </div>
+        <div class="content">
+            <p class="text textOne">振翅云顶之上</p>
+            <p class="text textTwo">极目星辰大海</p>
+        </div>
+        <div class="bottom">
+            <a href="{% url 'preach' %}" class="button">
+            <button type="button" onclick="" class="button buttonOne">宣讲会抢票</button>
+            </a>
+            <a href="{% url 'visit' %}" class="button">
+            <button type="button" onclick="" class="button buttonTwo">预约参观</button>
+            </a>
+        </div>
+
     </div>
+
 
 </body>
 </html>

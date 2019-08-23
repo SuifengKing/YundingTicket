@@ -1,62 +1,70 @@
+{% load staticfiles %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="description" content="">
-    <meta name="keywords" content="">
-    <meta name="viewport"
-        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <meta name="renderer" content="webkit">
-    <meta http-equiv="Cache-Control" content="no-siteapp"/>
-
-
     <meta charset="UTF-8">
-    <title>参观预约</title>
+    <title>Title</title>
+    <link rel="stylesheet" href="{% static 'css/ticketSnatching.css' %}">
+
+
 </head>
 <body>
-    <h1 align="center">参观预约</h1><br><hr>
-    <div align="center">
-            <form action="{% url 'get_visit_ticket' %}" method="post">
-                姓名：<input type="text" name="name" id="name" value="张三" required><br><br>
-                学号：<input type="text" name="stu_id" id="stu_id" value="2018000000" required><br><br>
-                专业：<input type="text" name="major" id="major" value="计算机科学与技术"><br><br>
-                时间：
-                <select id="times" name="times">
-                    {% for id,time in times_dict.items %}
-                        <option value="{{ id }}">{{ time }}</option>
-                    {% endfor %}
-                </select>
-                <br><br>
-            <input type="submit" value="提交">
+    <div class="contain">
+        <div class="wrapper">
+            <img src="{% static 'images/logo.png' %}" alt="" style="width: 668px;height:426px;position: absolute;right:2px ;top: 30px">
+
+            <div class="content">
+                <span>2019/<br>预约参观</span>
+            </div>
+        </div>
+        <div class="banner">
+            <form action="{% url 'get_visit_ticket' %}" id="get_ticket" method="post">
+                    <div class="part1">
+                        <input type="text" name="name" id="name" class="name"  placeholder="请输入名字" required><br>
+<!--                        <img src="images/icon1.png" alt="" class="pic1">-->
+                    </div>
+                <div class="part2">
+                    <input type="number" name="stu_id" id="stu_id" class="name" placeholder="请输入学号" required><br>
+                    <img src="{% static 'images/icon2.png' %}" alt="" class="pic">
+                </div>
+                <div class="part3">
+                    <input type="text" name="major" id="major" class="name" placeholder="请输入专业" required><br>
+                    <img src="{% static 'images/icon3.png' %}" alt="" class="pic">
+                </div>
+                <div style="display: flex" class="part4">
+                    <select id="times" name="times" class="name" >
+                        {% for id,time in times_dict.items %}
+                            <option value="{{ id }}">{{ time }}</option>
+                        {% endfor %}
+                    </select>
+                    <img src="{% static 'images/icon4.png' %}" alt="" class="pic">
+                </div>
+                <div class="blank"></div>
             {% csrf_token %}
+
             </form>
-{#        <button onclick="MovieSearch()">提交</button>#}
 
 
-                <h1>{{ name }}同学</h1>
-                <h1>票号:{{ result }}</h1>
-                <img src="http://qr.topscan.com/api.php?text=http://www.changyaojie.xyz{% url 'ticket_checked' %}?ticket_id={{ result }}">
-                <h1>请持此票于{{ time }}来参观云顶</h1>
+
+        </div>
+        <button class="btn" onclick="GetTicket()">开始抢票</button>
 
     </div>
 
 
-<script>
-    function MovieSearch() {
+    <script>
+    function GetTicket() {
         let name=document.getElementById('name').value;
         let stu_id=document.getElementById('stu_id').value;
         let major=document.getElementById('major').value;
-        let objTimes=document.getElementById("times");
-        let times=objTimes.options[objTimes.selectedIndex].value;
         if (name=='' ||stu_id=='' ||major==''){
-            alert('不能为空!!!')
+            alert('不能为空!!!');
         }
         else {
-            {#window.open('/ticket/get_preach_ticket/?name='+name+'stu_id='+stu_id+'major='+major);#}
-            window.location.href='/ticket/get_visit_ticket/?name='+name+'&stu_id='+stu_id+'&major='+major+'&times='+times
+            document.getElementById("get_ticket").submit();
         }
     }
-</script>
+    </script>
 
 </body>
 </html>

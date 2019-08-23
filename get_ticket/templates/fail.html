@@ -1,10 +1,34 @@
-<!DOCTYPE html>
+{% load staticfiles %}
+<!doctype html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>抢票失败</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/fail.css' %}" />
 </head>
 <body>
-<h1 align="center">抢票失败</h1>
+
+    <div class="container">
+
+        <div class="partOne">
+            <img src="{% static 'images/logoBlue.png' %}" class="logo">
+            <p class="title">抢票失败</p>
+            <p class="content">差一点就抢到门票了，下次要快点哦</p>
+        </div>
+        <div class="partTwo">
+            <p class="textOne">想提前看看云顶？</p>
+            <p class="textTwo">点击观看云顶书院720°全景</p>
+            <div class="content" onclick="window.location.href='https://720yun.com/t/92cjzztvky5?pano_id=6327448'">
+                <p class="title">云顶书院720°全景</p>
+                <p class="introduce">这里是开放的研学环境，<br/>有着浓郁的学习氛围</p>
+                <img src="{% static 'images/right.png' %}" class="right"/>
+            </div>
+        </div>
+
+    </div>
+
 </body>
 </html>
